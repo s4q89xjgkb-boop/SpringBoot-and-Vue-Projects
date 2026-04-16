@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.CollectMapper">
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        insert into `collect` (user_id, introduction_id, type, time)
+        values (#{userId}, #{introductionId}, #{type}, NOW())
+    </insert>
+
+    <delete id="delete">
+        delete from `collect`
+        where user_id = #{userId} and introduction_id = #{introductionId} and type = #{type}
+    </delete>
+
+    <delete id="deleteById">
+        delete from `collect`
+        where id = #{id}
+    </delete>
+
+    <select id="selectById" resultType="com.example.entity.Collect">
+        select * from `collect`
+        where id = #{id}
+    </select>
+
+    <select id="check" resultType="java.lang.Integer">
+        select count(*) from `collect`
+        where user_id = #{userId} and introduction_id = #{introductionId} and type = #{type}
+    </select>
+
+    <select id="selectAll" resultType="com.example.entity.Collect">
+        select * from `collect`
+        <where>
+            <if test="userId != null">user_id = #{userId}</if>
+            <if test="introductionId != null">and introduction_id = #{introductionId}</if>
+        </where>
+    </select>
+
+    <select id="selectPage" resultType="com.example.entity.Collect">
+        select c.*, 
+               case 
+                   when c.type = 'article' then i.title 
+                   when c.type = 'post' then p.title 
+                   when c.type = 'news' then n.title 
+                   else '' 
+               end as introductionTitle,
+               case 
+                   when c.type = 'article' then i.content 
+                   when c.type = 'post' then p.content 
+                   when c.type = 'news' then n.content 
+                   else '' 
+               end as introductionDescription,
+               case 
+                   when c.type = 'article' then i.img 
+                   when c.type = 'post' then '' 
+                   when c.type = 'news' then n.img 
+                   else '' 
+               end as introductionImg
+        from `collect` c
+        left join `introduction` i on c.type = 'article' and c.introduction_id = i.id
+        left join `post` p on c.type = 'post' and c.introduction_id = p.id
+        left join `news` n on c.type = 'news' and c.introduction_id = n.id
+        where c.user_id = #{userId}
+        <if test="type != null and type != ''">
+            and c.type = #{type}
+        </if>
+        order by c.time desc
+    </select>
+
+</mapper>

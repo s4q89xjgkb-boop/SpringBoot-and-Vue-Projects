@@ -1,0 +1,22 @@
+server:
+  port: 1306
+# \u6570\u636E\u5E93\u914D\u7F6E
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/code2026?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+  servlet:
+    multipart:
+      max-file-size: 5GB    # 单文件最大大小（支持大视频上传）
+      max-request-size: 10GB # 单次请求总文件大小（需大于单文件限制）
+      enabled: true           # 确保文件上传功能开启
+# \u914D\u7F6Emybatis\u5B9E\u4F53\u548Cxml\u6620\u5C04
+mybatis:
+  ## \u6620\u5C04xml
+  mapper-locations: classpath:mapper/*.xml  # classpath\u8868resource\u7684\u76EE\u5F55
+  configuration:
+    # \u914D\u7F6E\u65E5\u5FD7
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true # \u8BB2ad_id\u6539\u4E3AJava\u4E2D\u7684adId

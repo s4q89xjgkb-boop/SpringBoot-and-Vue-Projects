@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.PostMapper">
+
+    <resultMap id="PostResultMap" type="com.example.entity.Post">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="sectionId" column="section_id"/>
+        <result property="sectionTitle" column="sectionTitle"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="userName"/>
+        <result property="userAvatar" column="userAvatar"/>
+        <result property="status" column="status"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="collectCount" column="collect_count"/>
+        <result property="replyCount" column="reply_count"/>
+        <result property="views" column="views"/>
+        <result property="time" column="time"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="PostResultMap">
+        select * from `post`
+        <where>
+            <if test="title != null and title != ''">title like concat('%', #{title}, '%')</if>
+            <if test="content != null and content != ''">or content like concat('%', #{content}, '%')</if>
+            <if test="sectionId != null">and section_id = #{sectionId}</if>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="status != null">and status = #{status}</if>
+        </where>
+        <choose>
+            <when test="orderBy == 'views'">
+                order by views
+                <choose>
+                    <when test="orderDirection == 'asc'">asc</when>
+                    <otherwise>desc</otherwise>
+                </choose>
+            </when>
+            <when test="orderBy == 'likeCount'">
+                order by like_count
+                <choose>
+                    <when test="orderDirection == 'asc'">asc</when>
+                    <otherwise>desc</otherwise>
+                </choose>
+            </when>
+            <when test="orderBy == 'collectCount'">
+                order by collect_count
+                <choose>
+                    <when test="orderDirection == 'asc'">asc</when>
+                    <otherwise>desc</otherwise>
+                </choose>
+            </when>
+            <when test="orderBy == 'replyCount'">
+                order by reply_count
+                <choose>
+                    <when test="orderDirection == 'asc'">asc</when>
+                    <otherwise>desc</otherwise>
+                </choose>
+            </when>
+            <when test="orderBy == 'time'">
+                order by time
+                <choose>
+                    <when test="orderDirection == 'asc'">asc</when>
+                    <otherwise>desc</otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+    </select>
+
+    <insert id="insert">
+        insert into `post` (title, content, section_id, user_id, status, like_count, collect_count, reply_count, views, time)
+        values(#{title}, #{content}, #{sectionId}, #{userId}, #{status}, #{likeCount}, #{collectCount}, #{replyCount}, #{views}, #{time})
+    </insert>
+
+    <update id="updateById">
+        update `post`
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="sectionId != null">section_id = #{sectionId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="likeCount != null">like_count = #{likeCount},</if>
+            <if test="collectCount != null">collect_count = #{collectCount},</if>
+            <if test="replyCount != null">reply_count = #{replyCount},</if>
+            <if test="views != null">views = #{views}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="selectById" resultMap="PostResultMap">
+        select p.*, 
+               u.name as userName, 
+               u.avatar as userAvatar, 
+               fs.title as sectionTitle
+        from `post` p
+        left join `user` u on p.user_id = u.id
+        left join `forum_section` fs on p.section_id = fs.id
+        where p.id = #{id}
+    </select>
+
+    <update id="incrementLikeCount">
+        update `post` set like_count = like_count + 1 where id = #{id}
+    </update>
+
+    <update id="decrementLikeCount">
+        update `post` set like_count = like_count - 1 where id = #{id}
+    </update>
+
+    <update id="incrementCollectCount">
+        update `post` set collect_count = collect_count + 1 where id = #{id}
+    </update>
+
+    <update id="decrementCollectCount">
+        update `post` set collect_count = collect_count - 1 where id = #{id}
+    </update>
+
+    <update id="incrementReplyCount">
+        update `post` set reply_count = reply_count + 1 where id = #{id}
+    </update>
+
+    <update id="decrementReplyCount">
+        update `post` set reply_count = reply_count - 1 where id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.LikeMapper">
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id">
+        insert into `like` (user_id, introduction_id, type, time)
+        values (#{userId}, #{introductionId}, #{type}, NOW())
+    </insert>
+
+    <delete id="delete">
+        delete from `like`
+        where user_id = #{userId} and introduction_id = #{introductionId} and type = #{type}
+    </delete>
+
+    <delete id="deleteById">
+        delete from `like`
+        where id = #{id}
+    </delete>
+
+    <select id="selectById" resultType="com.example.entity.Like">
+        select * from `like`
+        where id = #{id}
+    </select>
+
+    <select id="check" resultType="java.lang.Integer">
+        select count(*) from `like`
+        where user_id = #{userId} and introduction_id = #{introductionId} and type = #{type}
+    </select>
+
+    <select id="selectAll" resultType="com.example.entity.Like">
+        select * from `like`
+        <where>
+            <if test="userId != null">user_id = #{userId}</if>
+            <if test="introductionId != null">and introduction_id = #{introductionId}</if>
+        </where>
+    </select>
+
+    <select id="selectPage" resultType="com.example.entity.Like">
+        select l.*, 
+               case 
+                   when l.type = 'article' then i.title 
+                   when l.type = 'post' then p.title 
+                   when l.type = 'news' then n.title 
+                   else '' 
+               end as introductionTitle,
+               case 
+                   when l.type = 'article' then i.content 
+                   when l.type = 'post' then p.content 
+                   when l.type = 'news' then n.content 
+                   else '' 
+               end as introductionDescription,
+               case 
+                   when l.type = 'article' then i.img 
+                   when l.type = 'post' then '' 
+                   when l.type = 'news' then n.img 
+                   else '' 
+               end as introductionImg
+        from `like` l
+        left join `introduction` i on l.type = 'article' and l.introduction_id = i.id
+        left join `post` p on l.type = 'post' and l.introduction_id = p.id
+        left join `news` n on l.type = 'news' and l.introduction_id = n.id
+        where l.user_id = #{userId}
+        <if test="type != null and type != ''">
+            and l.type = #{type}
+        </if>
+        order by l.time desc
+    </select>
+
+</mapper>
